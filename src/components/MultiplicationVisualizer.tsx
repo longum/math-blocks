@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { BlockGroup } from './Blocks';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, ArrowLeft, Plus, RotateCcw, Dices } from 'lucide-react';
+import { ArrowRight, ArrowLeft, X, RotateCcw, Dices } from 'lucide-react';
 
-export const AdditionVisualizer = () => {
-  const maxNum = 999; // Keep sum under 1000
-  const [num1, setNum1] = useState(125);
-  const [num2, setNum2] = useState(114);
+export const MultiplicationVisualizer = () => {
+  const maxMultiplier = 9;
+  const maxMultiplicand = 99;
+  const [num1, setNum1] = useState(3); // Multiplier (groups)
+  const [num2, setNum2] = useState(14); // Multiplicand (amount per group)
   const [input1, setInput1] = useState(num1.toString());
   const [input2, setInput2] = useState(num2.toString());
   
@@ -15,16 +16,18 @@ export const AdditionVisualizer = () => {
   const handleStart = () => {
     const n1 = parseInt(input1, 10);
     const n2 = parseInt(input2, 10);
-    if (!isNaN(n1) && !isNaN(n2) && n1 >= 1 && n2 >= 1 && n1 + n2 <= 999) {
+    if (!isNaN(n1) && !isNaN(n2) && n1 >= 1 && n1 <= maxMultiplier && n2 >= 1 && n2 <= maxMultiplicand) {
       setNum1(n1);
       setNum2(n2);
       setStep(1);
+    } else {
+      alert(`第一个数字（组数）请在 1-${maxMultiplier} 之间，第二个数字（每组数量）请在 1-${maxMultiplicand} 之间！`);
     }
   };
 
   const handleRandom = () => {
-    const n1 = Math.floor(Math.random() * 499) + 1;
-    const n2 = Math.floor(Math.random() * (999 - n1)) + 1;
+    const n1 = Math.floor(Math.random() * 5) + 2; // 2 to 6
+    const n2 = Math.floor(Math.random() * 25) + 10; // 10 to 34
     setNum1(n1);
     setNum2(n2);
     setInput1(n1.toString());
@@ -32,7 +35,7 @@ export const AdditionVisualizer = () => {
     setStep(0);
   };
 
-  const sum = num1 + num2;
+  const product = num1 * num2;
 
   const getBlocks = (val: number) => ({
     hundreds: Math.floor(val / 100),
@@ -40,12 +43,11 @@ export const AdditionVisualizer = () => {
     ones: val % 10
   });
 
-  const b1 = getBlocks(num1);
   const b2 = getBlocks(num2);
   
-  const rawHundreds = b1.hundreds + b2.hundreds;
-  const rawTens = b1.tens + b2.tens;
-  const rawOnes = b1.ones + b2.ones;
+  const rawHundreds = num1 * b2.hundreds;
+  const rawTens = num1 * b2.tens;
+  const rawOnes = num1 * b2.ones;
 
   const needsCarrying = rawOnes >= 10 || rawTens >= 10;
   
@@ -68,8 +70,8 @@ export const AdditionVisualizer = () => {
   };
 
   const stepsList = needsCarrying 
-    ? ['第一个数字', '第二个数字', '合并', '进位', '结果']
-    : ['第一个数字', '第二个数字', '合并结果'];
+    ? ['单组数量', '复制多组', '合并', '进位', '结果']
+    : ['单组数量', '复制多组', '合并结果'];
   
   const getActiveStepIndex = () => {
     if (step === 0) return -1;
@@ -90,20 +92,20 @@ export const AdditionVisualizer = () => {
           <input
             type="number"
             min="1"
-            max={maxNum}
+            max={maxMultiplier}
             value={input1}
             onChange={(e) => { setInput1(e.target.value); setStep(0); }}
-            className="text-3xl font-bold text-center w-28 p-3 rounded-2xl border-2 border-emerald-100 focus:border-emerald-400 outline-none text-emerald-900"
+            className="text-3xl font-bold text-center w-28 p-3 rounded-2xl border-2 border-amber-100 focus:border-amber-400 outline-none text-amber-900"
             disabled={step > 0}
           />
-          <Plus className="w-8 h-8 text-slate-400" />
+          <X className="w-8 h-8 text-slate-400" />
           <input
             type="number"
             min="1"
-            max={maxNum}
+            max={maxMultiplicand}
             value={input2}
             onChange={(e) => { setInput2(e.target.value); setStep(0); }}
-            className="text-3xl font-bold text-center w-28 p-3 rounded-2xl border-2 border-emerald-100 focus:border-emerald-400 outline-none text-emerald-900"
+            className="text-3xl font-bold text-center w-28 p-3 rounded-2xl border-2 border-amber-100 focus:border-amber-400 outline-none text-amber-900"
             disabled={step > 0}
           />
         </div>
@@ -112,13 +114,13 @@ export const AdditionVisualizer = () => {
           <div className="flex gap-3">
             <button
               onClick={handleStart}
-              className="bg-emerald-500 hover:bg-emerald-600 text-white px-8 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm"
+              className="bg-amber-500 hover:bg-amber-600 text-white px-8 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm"
             >
-              开始加法
+              开始乘法
             </button>
             <button
               onClick={handleRandom}
-              className="bg-amber-500 hover:bg-amber-600 text-white px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
+              className="bg-orange-400 hover:bg-orange-500 text-white px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
             >
               <Dices className="w-5 h-5" /> 随机
             </button>
@@ -128,14 +130,14 @@ export const AdditionVisualizer = () => {
             <button
               onClick={handlePrevStep}
               disabled={step === 1}
-              className="bg-emerald-100 hover:bg-emerald-200 disabled:bg-slate-100 disabled:text-slate-300 text-emerald-700 px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
+              className="bg-amber-100 hover:bg-amber-200 disabled:bg-slate-100 disabled:text-slate-300 text-amber-700 px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
             >
               <ArrowLeft className="w-5 h-5" /> 上一步
             </button>
             <button
               onClick={handleNextStep}
               disabled={step === maxStep}
-              className="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-200 disabled:text-slate-400 text-white px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
+              className="bg-amber-500 hover:bg-amber-600 disabled:bg-slate-200 disabled:text-slate-400 text-white px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
             >
               下一步 <ArrowRight className="w-5 h-5" />
             </button>
@@ -153,9 +155,9 @@ export const AdditionVisualizer = () => {
         {/* Step Indicators */}
         <div className="flex justify-center gap-8 mb-8">
           {stepsList.map((label, i) => (
-            <div key={label} className={`flex items-center gap-2 ${activeStepIndex >= i ? 'text-emerald-600 font-bold' : 'text-slate-400'}`}>
+            <div key={label} className={`flex items-center gap-2 ${activeStepIndex >= i ? 'text-amber-600 font-bold' : 'text-slate-400'}`}>
               <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                activeStepIndex >= i ? 'bg-emerald-100 text-emerald-600' : 'bg-slate-100 text-slate-400'
+                activeStepIndex >= i ? 'bg-amber-100 text-amber-600' : 'bg-slate-100 text-slate-400'
               }`}>
                 {i + 1}
               </div>
@@ -174,8 +176,8 @@ export const AdditionVisualizer = () => {
                 exit={{ opacity: 0, y: -20 }}
                 className="flex flex-col items-center"
               >
-                <div className="text-4xl font-black text-slate-800 mb-4">{num1}</div>
-                <BlockGroup hundreds={b1.hundreds} tens={b1.tens} ones={b1.ones} />
+                <div className="text-3xl font-bold text-slate-500 mb-2">1 组 <span className="text-amber-600">{num2}</span></div>
+                <BlockGroup hundreds={b2.hundreds} tens={b2.tens} ones={b2.ones} />
               </motion.div>
             )}
 
@@ -187,20 +189,15 @@ export const AdditionVisualizer = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex flex-col items-center w-full"
               >
-                <div className="flex justify-center items-end gap-12 w-full">
-                  <div className="flex flex-col items-center">
-                    <div className="text-3xl font-bold text-slate-500 mb-2">{num1}</div>
-                    <div className="scale-75 origin-bottom">
-                      <BlockGroup hundreds={b1.hundreds} tens={b1.tens} ones={b1.ones} stagger={false} />
+                <div className="text-3xl font-bold text-slate-800 mb-6">
+                  <span className="text-amber-600">{num1}</span> 组 <span className="text-amber-600">{num2}</span>
+                </div>
+                <div className="flex flex-wrap justify-center gap-8">
+                  {Array.from({ length: num1 }).map((_, i) => (
+                    <div key={i} className="bg-amber-50/50 p-4 rounded-2xl border border-amber-100 scale-75 origin-top">
+                      <BlockGroup hundreds={b2.hundreds} tens={b2.tens} ones={b2.ones} stagger={false} />
                     </div>
-                  </div>
-                  <div className="text-6xl font-black text-slate-300 mb-12">+</div>
-                  <div className="flex flex-col items-center">
-                    <div className="text-3xl font-bold text-emerald-600 mb-2">{num2}</div>
-                    <div className="scale-75 origin-bottom">
-                      <BlockGroup hundreds={b2.hundreds} tens={b2.tens} ones={b2.ones} />
-                    </div>
-                  </div>
+                  ))}
                 </div>
               </motion.div>
             )}
@@ -213,7 +210,7 @@ export const AdditionVisualizer = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex flex-col items-center w-full"
               >
-                <div className="text-3xl font-bold text-slate-800 mb-6">把积木放在一起</div>
+                <div className="text-3xl font-bold text-slate-800 mb-6">把所有积木合并</div>
                 <BlockGroup hundreds={rawHundreds} tens={rawTens} ones={rawOnes} stagger={false} />
               </motion.div>
             )}
@@ -226,8 +223,8 @@ export const AdditionVisualizer = () => {
                 exit={{ opacity: 0, scale: 0.9 }}
                 className="flex flex-col items-center w-full"
               >
-                <div className="text-xl text-emerald-600 mb-8 font-medium bg-emerald-50 px-6 py-3 rounded-xl border border-emerald-100">
-                  满10进1！10个小积木组合成1个大积木。
+                <div className="text-xl text-amber-600 mb-8 font-medium bg-amber-50 px-6 py-3 rounded-xl border border-amber-100">
+                  满10进1！把小积木组合成大积木。
                 </div>
                 <BlockGroup 
                   hundreds={finalHundreds} 
@@ -248,8 +245,8 @@ export const AdditionVisualizer = () => {
                 animate={{ opacity: 1, scale: 1 }}
                 className="flex flex-col items-center"
               >
-                <div className="text-5xl font-black text-emerald-600 mb-6">
-                  {num1} + {num2} = {sum}
+                <div className="text-5xl font-black text-amber-600 mb-6">
+                  {num1} × {num2} = {product}
                 </div>
                 <BlockGroup hundreds={finalHundreds} tens={finalTens} ones={finalOnes} stagger={false} />
               </motion.div>

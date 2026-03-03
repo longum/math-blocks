@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { BlockGroup } from './Blocks';
 import { motion, AnimatePresence } from 'motion/react';
-import { ArrowRight, Minus, RotateCcw, Dices } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Minus, RotateCcw, Dices } from 'lucide-react';
 
 export const SubtractionVisualizer = () => {
   const maxNum = 999;
@@ -83,6 +83,14 @@ export const SubtractionVisualizer = () => {
     }
   };
 
+  const handlePrevStep = () => {
+    if (step === 3 && !needsBorrowing) {
+      setStep(1); // Skip borrowing step backwards
+    } else {
+      setStep(s => Math.max(1, s - 1));
+    }
+  };
+
   const diff = num1 - num2;
   const bDiff = getBlocks(diff);
 
@@ -143,6 +151,13 @@ export const SubtractionVisualizer = () => {
           </div>
         ) : (
           <div className="flex gap-3">
+            <button
+              onClick={handlePrevStep}
+              disabled={step === 1}
+              className="bg-rose-100 hover:bg-rose-200 disabled:bg-slate-100 disabled:text-slate-300 text-rose-700 px-6 py-3 rounded-2xl font-bold text-lg transition-colors shadow-sm flex items-center gap-2"
+            >
+              <ArrowLeft className="w-5 h-5" /> 上一步
+            </button>
             <button
               onClick={handleNextStep}
               disabled={step === 4}
